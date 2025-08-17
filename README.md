@@ -58,12 +58,12 @@ foreach ($classified_data as $group_id => $items) {
 ### Group by Type
 
 ```php
-use Nilambar\Classifier\Utils\Group_Utils;
+use Nilambar\Classifier\Utils\GroupUtils;
 
 // Group data by type within categories
-$grouped_by_type = Group_Utils::group_by_type(
+$grouped_by_type = GroupUtils::groupByType(
     $data,
-    $classifier->get_group_config(),
+    $classifier->getGroupConfig(),
     'code',    // Field containing the classification code
     'type'     // Field containing the type information
 );
@@ -84,12 +84,12 @@ use Nilambar\Classifier\Classifier;
 
 // Validate JSON string against schema
 $json_string = '{"test": "value"}';
-$validation_result = Classifier::validate_json($json_string, '/path/to/schema.json');
 
-if (is_wp_error($validation_result)) {
-    echo "Validation failed: " . $validation_result->get_error_message();
-} else {
+try {
+    $validation_result = Classifier::validateJson($json_string, '/path/to/schema.json');
     echo "JSON validation successful.";
+} catch (Exception $e) {
+    echo "Validation failed: " . $e->getMessage();
 }
 ```
 

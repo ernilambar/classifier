@@ -15,7 +15,7 @@ use Nilambar\Classifier\Exception\ValidationException;
  *
  * @since 1.0.0
  */
-class JSON_Utils
+class JsonUtils
 {
     /**
      * Reads and decodes a JSON file.
@@ -25,7 +25,7 @@ class JSON_Utils
      * @throws FileNotFoundException When file is not found or not readable.
      * @throws JSONDecodeException When JSON decoding fails.
      */
-    public static function read_json(string $file_path): array
+    public static function readJson(string $file_path): array
     {
         // Check if file exists.
         if (!file_exists($file_path)) {
@@ -60,7 +60,7 @@ class JSON_Utils
      * @param string $str String to check for validity.
      * @return bool True if valid, otherwise false.
      */
-    public static function is_valid_json(string $str): bool
+    public static function isValidJson(string $str): bool
     {
         json_decode($str);
 
@@ -76,15 +76,15 @@ class JSON_Utils
      * @throws JSONDecodeException When JSON decoding fails.
      * @throws ValidationException When validation fails.
      */
-    public static function validate_json_string_with_schema(string $json_string, string $schema_file): bool
+    public static function validateJsonStringWithSchema(string $json_string, string $schema_file): bool
     {
         // Decode the JSON string to validate.
         $data = json_decode($json_string);
-        if (!self::is_valid_json($json_string)) {
+        if (!self::isValidJson($json_string)) {
             throw new JSONDecodeException($json_string, json_last_error_msg());
         }
 
-        return self::validate_json_data_with_schema($data, $schema_file);
+        return self::validateJsonDataWithSchema($data, $schema_file);
     }
 
     /**
@@ -96,10 +96,10 @@ class JSON_Utils
      * @throws FileNotFoundException When schema file is not found.
      * @throws ValidationException When validation fails.
      */
-    public static function validate_json_data_with_schema($data, string $schema_file): bool
+    public static function validateJsonDataWithSchema($data, string $schema_file): bool
     {
         // Read the schema file using existing method.
-        $schema_data = self::read_json($schema_file);
+        $schema_data = self::readJson($schema_file);
 
         // Convert data to object for validation.
         $json_data = json_decode(json_encode($data));
