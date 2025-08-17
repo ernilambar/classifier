@@ -30,6 +30,7 @@ npm-debug.log
 
 # Ignored extensions
 *~
+*.[Cc]ache
 *.diff
 *.err
 *.log
