@@ -40,7 +40,9 @@
 		"platform": {
 			"php": "7.4"
 		},
-		"sort-packages": true
+		"sort-packages": true,
+		"preferred-install": "dist",
+		"notify-on-install": false
 	},
 	"scripts": {
 		"format": "@php ./vendor/bin/phpcbf --report-full --report-summary",
@@ -50,6 +52,7 @@
 		],
 		"lint-php": "@php ./vendor/bin/parallel-lint --colors --exclude .git --exclude vendor .",
 		"phpcs": "@php ./vendor/bin/phpcs --report-full --report-summary",
-		"test": "@php ./vendor/bin/phpunit"
+		"test": "@php ./vendor/bin/phpunit",
+		"test-fast": "@php ./vendor/bin/phpunit --stop-on-failure --no-coverage"
 	}
 }

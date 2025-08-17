@@ -135,7 +135,7 @@ class GroupUtils
         foreach ($all_groups as $group_id => $group_details) {
             if (isset($group_details['checks'])) {
                 foreach ($group_details['checks'] as $check) {
-                    if (str_starts_with($code, $check) || str_contains($code, $check)) {
+                    if (0 === strpos($code, $check) || false !== strpos($code, $check)) {
                         // Check if this is a child category and return the parent instead.
                         if (isset($group_details['parent']) && !empty($group_details['parent'])) {
                             return $group_details['parent'];
@@ -155,17 +155,16 @@ class GroupUtils
      *
      * @param array  $data       Array of data to classify.
      * @param array  $all_groups Array of all groups.
-     * @param string $code_field Field name containing the classification code.
      * @return array Classified data array.
      */
-    public static function classifyData(array $data, array $all_groups, string $code_field = 'code'): array
+    public static function classifyData(array $data, array $all_groups): array
     {
         $categorized_data = [
             'ungrouped' => [],
         ];
 
         foreach ($data as $item) {
-            $code = $item[$code_field] ?? '';
+            $code = $item['code'] ?? '';
             $group = self::getItemCategoryId($code, $all_groups);
 
             if (!isset($categorized_data[$group])) {
@@ -192,105 +191,5 @@ class GroupUtils
         }
 
         return $ordered_data;
-    }
-
-    /**
-     * Groups data by type (e.g., error, warning) within each category.
-     *
-     * @param array  $data       Array of data to group.
-     * @param array  $all_groups Array of all groups.
-     * @param string $code_field Field name containing the classification code.
-     * @param string $type_field Field name containing the type information.
-     * @return array Grouped data with type categorization.
-     */
-    public static function groupByType(array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type'): array
-    {
-        $categories = [];
-
-        // Initialize category arrays.
-        $category_data = [];
-        foreach ($all_groups as $group_id => $group_details) {
-            $category_data[$group_id] = [
-                'name' => $group_details['title'],
-                'errors' => [],
-                'warnings' => [],
-                'other' => [],
-            ];
-        }
-        $category_data['ungrouped'] = [
-            'name' => 'Misc Issues',
-            'errors' => [],
-            'warnings' => [],
-            'other' => [],
-        ];
-
-        // Process each item and assign to appropriate category and type.
-        foreach ($data as $item) {
-            $code = $item[$code_field] ?? '';
-            $type = $item[$type_field] ?? '';
-
-            // Normalize the type to handle different case variations.
-            $normalized_type = strtolower($type);
-
-            $category_id = self::getItemCategoryId($code, $all_groups);
-
-            // Add to appropriate type array within the category.
-            if ('error' === $normalized_type) {
-                $category_data[$category_id]['errors'][] = $item;
-            } elseif ('warning' === $normalized_type) {
-                $category_data[$category_id]['warnings'][] = $item;
-            } else {
-                $category_data[$category_id]['other'][] = $item;
-            }
-        }
-
-        // Build final categories in the correct order.
-        foreach ($all_groups as $group_id => $group_details) {
-            $category = $category_data[$group_id];
-            $types = [];
-
-            // Add errors first, then warnings, then other.
-            if (!empty($category['errors'])) {
-                $types['errors'] = $category['errors'];
-            }
-            if (!empty($category['warnings'])) {
-                $types['warnings'] = $category['warnings'];
-            }
-            if (!empty($category['other'])) {
-                $types['other'] = $category['other'];
-            }
-
-            if (!empty($types)) {
-                $categories[] = [
-                    'name' => $category['name'],
-                    'types' => $types,
-                ];
-            }
-        }
-
-        // Add ungrouped items as "Misc Issues" at the end.
-        $misc_category = $category_data['ungrouped'];
-        $misc_types = [];
-
-        if (!empty($misc_category['errors'])) {
-            $misc_types['errors'] = $misc_category['errors'];
-        }
-        if (!empty($misc_category['warnings'])) {
-            $misc_types['warnings'] = $misc_category['warnings'];
-        }
-        if (!empty($misc_category['other'])) {
-            $misc_types['other'] = $misc_category['other'];
-        }
-
-        if (!empty($misc_types)) {
-            $categories[] = [
-                'name' => 'Misc Issues',
-                'types' => $misc_types,
-            ];
-        }
-
-        return [
-            'categories' => $categories,
-        ];
     }
 }

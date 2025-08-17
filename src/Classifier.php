@@ -123,15 +123,14 @@ class Classifier
      * @since 1.0.0
      *
      * @param array $data Array of data items to classify.
-     * @param string $code_field Field name containing the classification code.
      * @return array Classified data organized by groups.
      */
-    public function classify(array $data, string $code_field = 'code'): array
+    public function classify(array $data): array
     {
         if (! $this->is_valid || empty($this->group_config)) {
             return [];
         }
 
-        return GroupUtils::classifyData($data, $this->group_config, $code_field);
+        return GroupUtils::classifyData($data, $this->group_config);
     }
 }

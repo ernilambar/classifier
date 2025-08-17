@@ -113,7 +113,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifierInstantiation(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $this->assertInstanceOf(Classifier::class, $classifier);
@@ -139,7 +139,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyDataWithDefaultCodeField(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $result = $classifier->classify($this->test_data);
@@ -160,33 +160,7 @@ class ClassifierTest extends TestCase
         $this->assertNotEmpty($result['plugin_header']);
     }
 
-    /**
-     * Test classification of data with custom code field.
-     *
-     * @since 1.0.0
-     */
-    public function testClassifyDataWithCustomCodeField(): void
-    {
-        $config_file = __DIR__ . '/../data/groups.json';
-        $classifier = new Classifier($config_file);
 
-        // Test data with custom code field name.
-        $custom_data = [
-            [
-                'file' => 'test.php',
-                'line' => 10,
-                'type' => 'ERROR',
-                'custom_code' => 'WordPress.WP.I18n.MissingArgDomain',
-                'message' => 'Test message',
-            ],
-        ];
-
-        $result = $classifier->classify($custom_data, 'custom_code');
-
-        $this->assertIsArray($result);
-        $this->assertNotEmpty($result);
-        $this->assertArrayHasKey('i18n', $result);
-    }
 
     /**
      * Test classification with empty data.
@@ -195,7 +169,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyEmptyData(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $result = $classifier->classify([]);
@@ -211,7 +185,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyDataWithNoMatchingCodes(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $unmatched_data = [
@@ -239,7 +213,7 @@ class ClassifierTest extends TestCase
      */
     public function testI18nIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $i18n_data = [
@@ -274,7 +248,7 @@ class ClassifierTest extends TestCase
      */
     public function testPluginReadmeIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $readme_data = [
@@ -307,7 +281,7 @@ class ClassifierTest extends TestCase
      */
     public function testPluginHeaderIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $header_data = [
@@ -333,7 +307,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassificationWithMixedDataTypes(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $mixed_data = [
@@ -387,7 +361,7 @@ class ClassifierTest extends TestCase
      */
     public function testDataStructurePreservation(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $test_item = [
