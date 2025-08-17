@@ -160,54 +160,13 @@ class GroupUtils
      */
     public static function classifyData(array $data, array $all_groups, string $code_field = 'code'): array
     {
-        $prefix_map = [];
-        $contains_map = [];
-
-        $all_prefixes = array_values(self::filterByProperties($all_groups, ['type' => 'prefix']));
-        $all_contains = array_values(self::filterByProperties($all_groups, ['type' => 'contains']));
-
-        if (!empty($all_prefixes)) {
-            foreach ($all_prefixes as $item) {
-                $prefix_check = reset($item['checks']);
-                $prefix_map[$prefix_check] = $item['id'];
-            }
-        }
-
-        if (!empty($all_contains)) {
-            foreach ($all_contains as $item) {
-                $all_checks = $item['checks'] ?? [];
-
-                foreach ($all_checks as $check_string) {
-                    $contains_map[$check_string] = $item['id'];
-                }
-            }
-        }
-
         $categorized_data = [
             'ungrouped' => [],
         ];
 
         foreach ($data as $item) {
             $code = $item[$code_field] ?? '';
-            $group = 'ungrouped';
-
-            // Check prefixes first.
-            foreach ($prefix_map as $prefix => $group_name) {
-                if (str_starts_with($code, $prefix)) {
-                    $group = $group_name;
-                    break;
-                }
-            }
-
-            // Check contains if no prefix match.
-            if ('ungrouped' === $group) {
-                foreach ($contains_map as $needle => $group_name) {
-                    if (str_contains($code, $needle)) {
-                        $group = $group_name;
-                        break;
-                    }
-                }
-            }
+            $group = self::getItemCategoryId($code, $all_groups);
 
             if (!isset($categorized_data[$group])) {
                 $categorized_data[$group] = [];

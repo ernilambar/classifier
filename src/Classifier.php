@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Nilambar\Classifier;
 
+use Exception;
 use Nilambar\Classifier\Utils\GroupUtils;
 use Nilambar\Classifier\Utils\JsonUtils;
 
