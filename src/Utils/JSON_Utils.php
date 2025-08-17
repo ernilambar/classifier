@@ -128,7 +128,6 @@ class JSON_Utils
             }
 
             throw new ValidationException($errors, 'JSON schema validation');
-
         } catch (ValidationException $e) {
             // Re-throw validation exceptions.
             throw $e;
