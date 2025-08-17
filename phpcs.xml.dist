@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<ruleset name="Classifier Project">
+    <description>PHP_CodeSniffer ruleset for Classifier project</description>
+
+    <!-- Include PSR2 standard -->
+    <rule ref="PSR2"/>
+
+    <!-- Additional rules for better code quality -->
+    <rule ref="PSR12"/>
+
+    <!-- Custom rules for the project -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="150"/>
+        </properties>
+    </rule>
+
+    <!-- Exclude vendor directory -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+
+    <!-- Exclude composer files -->
+    <exclude-pattern>composer.json</exclude-pattern>
+    <exclude-pattern>composer.lock</exclude-pattern>
+
+    <!-- Include all PHP files in src directory -->
+    <file>src/</file>
+
+    <!-- Include example files -->
+    <file>example.php</file>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+
+    <!-- Show source codes -->
+    <arg value="s"/>
+
+    <!-- Show sniff codes -->
+    <arg value="n"/>
+
+	<!-- Disallows grouped use declarations. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.DisallowGroupUse" />
+	<!-- Disallows leading backslash in use statement. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash" />
+	<!-- Checks whether uses at the top of a file are alphabetically sorted. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses" />
+	<!-- Prohibits uses from the same namespace. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.UseFromSameNamespace" />
+	<!-- Looks for unused imports from other namespaces. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+		<properties>
+			<property name="searchAnnotations" value="true" />
+		</properties>
+	</rule>
+	<!-- All references to functions, classes and constants should import using a use statement. -->
+	<rule ref="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly">
+		<properties>
+			<property name="allowFullyQualifiedGlobalFunctions" value="true" />
+			<property name="allowFullyQualifiedGlobalClasses" value="true" />
+			<property name="allowFullyQualifiedGlobalConstants" value="true" />
+			<property name="allowFallbackGlobalFunctions" value="true" />
+			<property name="allowFallbackGlobalConstants" value="true" />
+			<property name="allowFullyQualifiedNameForCollidingClasses" value="true" />
+		</properties>
+	</rule>
+
+</ruleset>

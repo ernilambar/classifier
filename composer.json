@@ -28,10 +28,7 @@
 	"autoload": {
 		"psr-4": {
 			"Nilambar\\Classifier\\": "src/"
-		},
-		"files": [
-			"src/WordPress/Functions.php"
-		]
+		}
 	},
 	"config": {
 		"allow-plugins": {
