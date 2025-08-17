@@ -1,292 +1,337 @@
 <?php
-/**
- * Group_Utils
- *
- * @package Classifier
- */
 
 declare(strict_types=1);
 
 namespace Nilambar\Classifier\Utils;
 
-use function Nilambar\Classifier\WordPress\wp_list_filter;
-
 /**
- * Group_Utils class.
- *
- * Handles grouping and classification logic.
+ * Group utility functions.
  *
  * @since 1.0.0
  */
-class Group_Utils {
+class Group_Utils
+{
+    /**
+     * Filters a list of objects or arrays based on a set of key => value arguments.
+     *
+     * @param array $list     An array of objects or arrays to filter.
+     * @param array $args     An array of key => value arguments to match against each item.
+     * @param string $operator The logical operation to perform ('AND' or 'OR').
+     * @return array Array of found items.
+     */
+    private static function filter_by_properties(array $list, array $args = [], string $operator = 'AND'): array
+    {
+        if (empty($args)) {
+            return $list;
+        }
 
-	/**
-	 * Processes group configuration and flattens the structure.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array $groups Raw group configuration.
-	 * @return array Processed group definitions.
-	 */
-	public static function process_group_config( array $groups ): array {
-		$processed_groups = [];
+        $filtered = [];
 
-		foreach ( $groups as $group_id => $group_data ) {
-			// Skip the $schema property.
-			if ( '$schema' === $group_id ) {
-				continue;
-			}
+        foreach ($list as $key => $item) {
+            $matched = true;
 
-			// Skip non-array group data.
-			if ( ! is_array( $group_data ) ) {
-				continue;
-			}
+            foreach ($args as $match_key => $match_value) {
+                if (is_object($item)) {
+                    if (!isset($item->$match_key)) {
+                        $matched = false;
+                        break;
+                    }
+                    $item_value = $item->$match_key;
+                } elseif (is_array($item)) {
+                    if (!isset($item[$match_key])) {
+                        $matched = false;
+                        break;
+                    }
+                    $item_value = $item[$match_key];
+                } else {
+                    $matched = false;
+                    break;
+                }
 
-			// Add parent group.
-			$processed_groups[ $group_id ] = [
-				'id'    => $group_data['id'] ?? '',
-				'title' => $group_data['title'] ?? '',
-			];
+                if ('AND' === $operator) {
+                    if ($item_value !== $match_value) {
+                        $matched = false;
+                        break;
+                    }
+                } elseif ('OR' === $operator) {
+                    if ($item_value === $match_value) {
+                        $matched = true;
+                        break;
+                    }
+                }
+            }
 
-			// Add child groups if they exist.
-			if ( isset( $group_data['children'] ) && is_array( $group_data['children'] ) ) {
-				foreach ( $group_data['children'] as $child_id => $child_data ) {
-					if ( is_array( $child_data ) ) {
-						$processed_groups[ $child_id ] = [
-							'id'     => $child_data['id'] ?? '',
-							'title'  => $child_data['title'] ?? '',
-							'type'   => $child_data['type'] ?? '',
-							'parent' => $child_data['parent'] ?? '',
-							'checks' => $child_data['checks'] ?? [],
-						];
-					}
-				}
-			} else {
-				// Direct group without children.
-				if ( isset( $group_data['type'] ) ) {
-					$processed_groups[ $group_id ]['type'] = $group_data['type'];
-				}
-				if ( isset( $group_data['checks'] ) ) {
-					$processed_groups[ $group_id ]['checks'] = $group_data['checks'];
-				}
-			}
-		}
+            if ($matched) {
+                $filtered[$key] = $item;
+            }
+        }
 
-		return $processed_groups;
-	}
+        return $filtered;
+    }
 
-	/**
-	 * Gets the category ID for an item based on its code.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $code        Item code.
-	 * @param array  $all_groups  Array of all groups.
-	 * @return string Category ID.
-	 */
-	public static function get_item_category_id( string $code, array $all_groups ): string {
-		foreach ( $all_groups as $group_id => $group_details ) {
-			if ( isset( $group_details['checks'] ) ) {
-				foreach ( $group_details['checks'] as $check ) {
-					if ( str_starts_with( $code, $check ) || str_contains( $code, $check ) ) {
-						// Check if this is a child category and return the parent instead.
-						if ( isset( $group_details['parent'] ) && ! empty( $group_details['parent'] ) ) {
-							return $group_details['parent'];
-						}
-						return $group_id;
-					}
-				}
-			}
-		}
+    /**
+     * Processes group configuration and flattens the structure.
+     *
+     * @param array $groups Raw group configuration.
+     * @return array Processed group definitions.
+     */
+    public static function process_group_config(array $groups): array
+    {
+        $processed_groups = [];
 
-		// Default category if no match found.
-		return 'ungrouped';
-	}
+        foreach ($groups as $group_id => $group_data) {
+            // Skip the $schema property.
+            if ('$schema' === $group_id) {
+                continue;
+            }
 
-	/**
-	 * Classifies data based on predefined categories and patterns.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $data        Array of data to classify.
-	 * @param array  $all_groups  Array of all groups.
-	 * @param string $code_field  Field name containing the classification code.
-	 * @return array Classified data array.
-	 */
-	public static function classify_data( array $data, array $all_groups, string $code_field = 'code' ): array {
-		$prefix_map   = [];
-		$contains_map = [];
+            // Skip non-array group data.
+            if (!is_array($group_data)) {
+                continue;
+            }
 
-		$all_prefixes = array_values( wp_list_filter( $all_groups, [ 'type' => 'prefix' ] ) );
-		$all_contains = array_values( wp_list_filter( $all_groups, [ 'type' => 'contains' ] ) );
+            // Add parent group.
+            $processed_groups[$group_id] = [
+                'id' => $group_data['id'] ?? '',
+                'title' => $group_data['title'] ?? '',
+            ];
 
-		if ( ! empty( $all_prefixes ) ) {
-			foreach ( $all_prefixes as $item ) {
-				$prefix_check = reset( $item['checks'] );
-				$prefix_map[ $prefix_check ] = $item['id'];
-			}
-		}
+            // Add child groups if they exist.
+            if (isset($group_data['children']) && is_array($group_data['children'])) {
+                foreach ($group_data['children'] as $child_id => $child_data) {
+                    if (is_array($child_data)) {
+                        $processed_groups[$child_id] = [
+                            'id' => $child_data['id'] ?? '',
+                            'title' => $child_data['title'] ?? '',
+                            'type' => $child_data['type'] ?? '',
+                            'parent' => $child_data['parent'] ?? '',
+                            'checks' => $child_data['checks'] ?? [],
+                        ];
+                    }
+                }
+            } else {
+                // Direct group without children.
+                if (isset($group_data['type'])) {
+                    $processed_groups[$group_id]['type'] = $group_data['type'];
+                }
+                if (isset($group_data['checks'])) {
+                    $processed_groups[$group_id]['checks'] = $group_data['checks'];
+                }
+            }
+        }
 
-		if ( ! empty( $all_contains ) ) {
-			foreach ( $all_contains as $item ) {
-				$all_checks = $item['checks'] ?? [];
+        return $processed_groups;
+    }
 
-				foreach ( $all_checks as $check_string ) {
-					$contains_map[ $check_string ] = $item['id'];
-				}
-			}
-		}
+    /**
+     * Gets the category ID for an item based on its code.
+     *
+     * @param string $code       Item code.
+     * @param array  $all_groups Array of all groups.
+     * @return string Category ID.
+     */
+    public static function get_item_category_id(string $code, array $all_groups): string
+    {
+        foreach ($all_groups as $group_id => $group_details) {
+            if (isset($group_details['checks'])) {
+                foreach ($group_details['checks'] as $check) {
+                    if (str_starts_with($code, $check) || str_contains($code, $check)) {
+                        // Check if this is a child category and return the parent instead.
+                        if (isset($group_details['parent']) && !empty($group_details['parent'])) {
+                            return $group_details['parent'];
+                        }
+                        return $group_id;
+                    }
+                }
+            }
+        }
 
-		$categorized_data = [
-			'ungrouped' => [],
-		];
+        // Default category if no match found.
+        return 'ungrouped';
+    }
 
-		foreach ( $data as $item ) {
-			$code  = $item[ $code_field ] ?? '';
-			$group = 'ungrouped';
+    /**
+     * Classifies data based on predefined categories and patterns.
+     *
+     * @param array  $data       Array of data to classify.
+     * @param array  $all_groups Array of all groups.
+     * @param string $code_field Field name containing the classification code.
+     * @return array Classified data array.
+     */
+    public static function classify_data(array $data, array $all_groups, string $code_field = 'code'): array
+    {
+        $prefix_map = [];
+        $contains_map = [];
 
-			// Check prefixes first.
-			foreach ( $prefix_map as $prefix => $group_name ) {
-				if ( str_starts_with( $code, $prefix ) ) {
-					$group = $group_name;
-					break;
-				}
-			}
+        $all_prefixes = array_values(self::filter_by_properties($all_groups, ['type' => 'prefix']));
+        $all_contains = array_values(self::filter_by_properties($all_groups, ['type' => 'contains']));
 
-			// Check contains if no prefix match.
-			if ( 'ungrouped' === $group ) {
-				foreach ( $contains_map as $needle => $group_name ) {
-					if ( str_contains( $code, $needle ) ) {
-						$group = $group_name;
-						break;
-					}
-				}
-			}
+        if (!empty($all_prefixes)) {
+            foreach ($all_prefixes as $item) {
+                $prefix_check = reset($item['checks']);
+                $prefix_map[$prefix_check] = $item['id'];
+            }
+        }
 
-			if ( ! isset( $categorized_data[ $group ] ) ) {
-				$categorized_data[ $group ] = [];
-			}
+        if (!empty($all_contains)) {
+            foreach ($all_contains as $item) {
+                $all_checks = $item['checks'] ?? [];
 
-			$categorized_data[ $group ][] = $item;
-		}
+                foreach ($all_checks as $check_string) {
+                    $contains_map[$check_string] = $item['id'];
+                }
+            }
+        }
 
-		// Maintain order based on array order.
-		$ordered_data = [];
-		$ungrouped    = $categorized_data['ungrouped'] ?? [];
+        $categorized_data = [
+            'ungrouped' => [],
+        ];
 
-		// Add groups in the order they appear.
-		foreach ( $all_groups as $group_id => $group_details ) {
-			if ( isset( $categorized_data[ $group_id ] ) && ! empty( $categorized_data[ $group_id ] ) ) {
-				$ordered_data[ $group_id ] = $categorized_data[ $group_id ];
-			}
-		}
+        foreach ($data as $item) {
+            $code = $item[$code_field] ?? '';
+            $group = 'ungrouped';
 
-		// Add ungrouped at the end if it has items.
-		if ( ! empty( $ungrouped ) ) {
-			$ordered_data['ungrouped'] = $ungrouped;
-		}
+            // Check prefixes first.
+            foreach ($prefix_map as $prefix => $group_name) {
+                if (str_starts_with($code, $prefix)) {
+                    $group = $group_name;
+                    break;
+                }
+            }
 
-		return $ordered_data;
-	}
+            // Check contains if no prefix match.
+            if ('ungrouped' === $group) {
+                foreach ($contains_map as $needle => $group_name) {
+                    if (str_contains($code, $needle)) {
+                        $group = $group_name;
+                        break;
+                    }
+                }
+            }
 
-	/**
-	 * Groups data by type (e.g., error, warning) within each category.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $data        Array of data to group.
-	 * @param array  $all_groups  Array of all groups.
-	 * @param string $code_field  Field name containing the classification code.
-	 * @param string $type_field  Field name containing the type information.
-	 * @return array Grouped data with type categorization.
-	 */
-	public static function group_by_type( array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type' ): array {
-		$categories = [];
+            if (!isset($categorized_data[$group])) {
+                $categorized_data[$group] = [];
+            }
 
-		// Initialize category arrays.
-		$category_data = [];
-		foreach ( $all_groups as $group_id => $group_details ) {
-			$category_data[ $group_id ] = [
-				'name'     => $group_details['title'],
-				'errors'   => [],
-				'warnings' => [],
-				'other'    => [],
-			];
-		}
-		$category_data['ungrouped'] = [
-			'name'     => 'Misc Issues',
-			'errors'   => [],
-			'warnings' => [],
-			'other'    => [],
-		];
+            $categorized_data[$group][] = $item;
+        }
 
-		// Process each item and assign to appropriate category and type.
-		foreach ( $data as $item ) {
-			$code = $item[ $code_field ] ?? '';
-			$type = $item[ $type_field ] ?? '';
+        // Maintain order based on array order.
+        $ordered_data = [];
+        $ungrouped = $categorized_data['ungrouped'] ?? [];
 
-			// Normalize the type to handle different case variations.
-			$normalized_type = strtolower( $type );
+        // Add groups in the order they appear.
+        foreach ($all_groups as $group_id => $group_details) {
+            if (isset($categorized_data[$group_id]) && !empty($categorized_data[$group_id])) {
+                $ordered_data[$group_id] = $categorized_data[$group_id];
+            }
+        }
 
-			$category_id = self::get_item_category_id( $code, $all_groups );
+        // Add ungrouped at the end if it has items.
+        if (!empty($ungrouped)) {
+            $ordered_data['ungrouped'] = $ungrouped;
+        }
 
-			// Add to appropriate type array within the category.
-			if ( 'error' === $normalized_type ) {
-				$category_data[ $category_id ]['errors'][] = $item;
-			} elseif ( 'warning' === $normalized_type ) {
-				$category_data[ $category_id ]['warnings'][] = $item;
-			} else {
-				$category_data[ $category_id ]['other'][] = $item;
-			}
-		}
+        return $ordered_data;
+    }
 
-		// Build final categories in the correct order.
-		foreach ( $all_groups as $group_id => $group_details ) {
-			$category = $category_data[ $group_id ];
-			$types    = [];
+    /**
+     * Groups data by type (e.g., error, warning) within each category.
+     *
+     * @param array  $data       Array of data to group.
+     * @param array  $all_groups Array of all groups.
+     * @param string $code_field Field name containing the classification code.
+     * @param string $type_field Field name containing the type information.
+     * @return array Grouped data with type categorization.
+     */
+    public static function group_by_type(array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type'): array
+    {
+        $categories = [];
 
-			// Add errors first, then warnings, then other.
-			if ( ! empty( $category['errors'] ) ) {
-				$types['errors'] = $category['errors'];
-			}
-			if ( ! empty( $category['warnings'] ) ) {
-				$types['warnings'] = $category['warnings'];
-			}
-			if ( ! empty( $category['other'] ) ) {
-				$types['other'] = $category['other'];
-			}
+        // Initialize category arrays.
+        $category_data = [];
+        foreach ($all_groups as $group_id => $group_details) {
+            $category_data[$group_id] = [
+                'name' => $group_details['title'],
+                'errors' => [],
+                'warnings' => [],
+                'other' => [],
+            ];
+        }
+        $category_data['ungrouped'] = [
+            'name' => 'Misc Issues',
+            'errors' => [],
+            'warnings' => [],
+            'other' => [],
+        ];
 
-			if ( ! empty( $types ) ) {
-				$categories[] = [
-					'name'  => $category['name'],
-					'types' => $types,
-				];
-			}
-		}
+        // Process each item and assign to appropriate category and type.
+        foreach ($data as $item) {
+            $code = $item[$code_field] ?? '';
+            $type = $item[$type_field] ?? '';
 
-		// Add ungrouped items as "Misc Issues" at the end.
-		$misc_category = $category_data['ungrouped'];
-		$misc_types    = [];
+            // Normalize the type to handle different case variations.
+            $normalized_type = strtolower($type);
 
-		if ( ! empty( $misc_category['errors'] ) ) {
-			$misc_types['errors'] = $misc_category['errors'];
-		}
-		if ( ! empty( $misc_category['warnings'] ) ) {
-			$misc_types['warnings'] = $misc_category['warnings'];
-		}
-		if ( ! empty( $misc_category['other'] ) ) {
-			$misc_types['other'] = $misc_category['other'];
-		}
+            $category_id = self::get_item_category_id($code, $all_groups);
 
-		if ( ! empty( $misc_types ) ) {
-			$categories[] = [
-				'name'  => 'Misc Issues',
-				'types' => $misc_types,
-			];
-		}
+            // Add to appropriate type array within the category.
+            if ('error' === $normalized_type) {
+                $category_data[$category_id]['errors'][] = $item;
+            } elseif ('warning' === $normalized_type) {
+                $category_data[$category_id]['warnings'][] = $item;
+            } else {
+                $category_data[$category_id]['other'][] = $item;
+            }
+        }
 
-		return [
-			'categories' => $categories,
-		];
-	}
+        // Build final categories in the correct order.
+        foreach ($all_groups as $group_id => $group_details) {
+            $category = $category_data[$group_id];
+            $types = [];
+
+            // Add errors first, then warnings, then other.
+            if (!empty($category['errors'])) {
+                $types['errors'] = $category['errors'];
+            }
+            if (!empty($category['warnings'])) {
+                $types['warnings'] = $category['warnings'];
+            }
+            if (!empty($category['other'])) {
+                $types['other'] = $category['other'];
+            }
+
+            if (!empty($types)) {
+                $categories[] = [
+                    'name' => $category['name'],
+                    'types' => $types,
+                ];
+            }
+        }
+
+        // Add ungrouped items as "Misc Issues" at the end.
+        $misc_category = $category_data['ungrouped'];
+        $misc_types = [];
+
+        if (!empty($misc_category['errors'])) {
+            $misc_types['errors'] = $misc_category['errors'];
+        }
+        if (!empty($misc_category['warnings'])) {
+            $misc_types['warnings'] = $misc_category['warnings'];
+        }
+        if (!empty($misc_category['other'])) {
+            $misc_types['other'] = $misc_category['other'];
+        }
+
+        if (!empty($misc_types)) {
+            $categories[] = [
+                'name' => 'Misc Issues',
+                'types' => $misc_types,
+            ];
+        }
+
+        return [
+            'categories' => $categories,
+        ];
+    }
 }
