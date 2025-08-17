@@ -155,17 +155,16 @@ class GroupUtils
      *
      * @param array  $data       Array of data to classify.
      * @param array  $all_groups Array of all groups.
-     * @param string $code_field Field name containing the classification code.
      * @return array Classified data array.
      */
-    public static function classifyData(array $data, array $all_groups, string $code_field = 'code'): array
+    public static function classifyData(array $data, array $all_groups): array
     {
         $categorized_data = [
             'ungrouped' => [],
         ];
 
         foreach ($data as $item) {
-            $code = $item[$code_field] ?? '';
+            $code = $item['code'] ?? '';
             $group = self::getItemCategoryId($code, $all_groups);
 
             if (!isset($categorized_data[$group])) {
@@ -199,11 +198,10 @@ class GroupUtils
      *
      * @param array  $data       Array of data to group.
      * @param array  $all_groups Array of all groups.
-     * @param string $code_field Field name containing the classification code.
      * @param string $type_field Field name containing the type information.
      * @return array Grouped data with type categorization.
      */
-    public static function groupByType(array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type'): array
+    public static function groupByType(array $data, array $all_groups, string $type_field = 'type'): array
     {
         $categories = [];
 
@@ -226,7 +224,7 @@ class GroupUtils
 
         // Process each item and assign to appropriate category and type.
         foreach ($data as $item) {
-            $code = $item[$code_field] ?? '';
+            $code = $item['code'] ?? '';
             $type = $item[$type_field] ?? '';
 
             // Normalize the type to handle different case variations.
