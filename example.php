@@ -9,8 +9,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Nilambar\Classifier\Classifier;
-use Nilambar\Classifier\Utils\Group_Utils;
-use function Nilambar\Classifier\WordPress\is_wp_error;
+use Nilambar\Classifier\Utils\GroupUtils;
 
 // Sample data to classify.
 $sample_data = [
@@ -77,7 +76,7 @@ foreach ($classified_data as $group_id => $items) {
 }
 
 echo "\n=== Grouped by Type ===\n";
-$grouped_by_type = Group_Utils::group_by_type($sample_data, $classifier->get_group_config());
+$grouped_by_type = GroupUtils::groupByType($sample_data, $classifier->getGroupConfig());
 
 foreach ($grouped_by_type['categories'] as $category) {
     echo "\nCategory: {$category['name']}\n";
@@ -95,10 +94,10 @@ echo "\n=== JSON Validation Example ===\n";
 
 // Example of JSON validation.
 $json_string = '{"test": "value"}';
-$validation_result = Classifier::validate_json($json_string, $schema_file);
 
-if (is_wp_error($validation_result)) {
-    echo "Validation failed: " . $validation_result->get_error_message() . "\n";
-} else {
+try {
+    $validation_result = Classifier::validateJson($json_string, $schema_file);
     echo "JSON validation successful.\n";
+} catch (Exception $e) {
+    echo "Validation failed: " . $e->getMessage() . "\n";
 }

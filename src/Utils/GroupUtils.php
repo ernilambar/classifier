@@ -9,7 +9,7 @@ namespace Nilambar\Classifier\Utils;
  *
  * @since 1.0.0
  */
-class Group_Utils
+class GroupUtils
 {
     /**
      * Filters a list of objects or arrays based on a set of key => value arguments.
@@ -19,7 +19,7 @@ class Group_Utils
      * @param string $operator The logical operation to perform ('AND' or 'OR').
      * @return array Array of found items.
      */
-    private static function filter_by_properties(array $list, array $args = [], string $operator = 'AND'): array
+    private static function filterByProperties(array $list, array $args = [], string $operator = 'AND'): array
     {
         if (empty($args)) {
             return $list;
@@ -75,7 +75,7 @@ class Group_Utils
      * @param array $groups Raw group configuration.
      * @return array Processed group definitions.
      */
-    public static function process_group_config(array $groups): array
+    public static function processGroupConfig(array $groups): array
     {
         $processed_groups = [];
 
@@ -130,7 +130,7 @@ class Group_Utils
      * @param array  $all_groups Array of all groups.
      * @return string Category ID.
      */
-    public static function get_item_category_id(string $code, array $all_groups): string
+    public static function getItemCategoryId(string $code, array $all_groups): string
     {
         foreach ($all_groups as $group_id => $group_details) {
             if (isset($group_details['checks'])) {
@@ -158,13 +158,13 @@ class Group_Utils
      * @param string $code_field Field name containing the classification code.
      * @return array Classified data array.
      */
-    public static function classify_data(array $data, array $all_groups, string $code_field = 'code'): array
+    public static function classifyData(array $data, array $all_groups, string $code_field = 'code'): array
     {
         $prefix_map = [];
         $contains_map = [];
 
-        $all_prefixes = array_values(self::filter_by_properties($all_groups, ['type' => 'prefix']));
-        $all_contains = array_values(self::filter_by_properties($all_groups, ['type' => 'contains']));
+        $all_prefixes = array_values(self::filterByProperties($all_groups, ['type' => 'prefix']));
+        $all_contains = array_values(self::filterByProperties($all_groups, ['type' => 'contains']));
 
         if (!empty($all_prefixes)) {
             foreach ($all_prefixes as $item) {
@@ -244,7 +244,7 @@ class Group_Utils
      * @param string $type_field Field name containing the type information.
      * @return array Grouped data with type categorization.
      */
-    public static function group_by_type(array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type'): array
+    public static function groupByType(array $data, array $all_groups, string $code_field = 'code', string $type_field = 'type'): array
     {
         $categories = [];
 
@@ -273,7 +273,7 @@ class Group_Utils
             // Normalize the type to handle different case variations.
             $normalized_type = strtolower($type);
 
-            $category_id = self::get_item_category_id($code, $all_groups);
+            $category_id = self::getItemCategoryId($code, $all_groups);
 
             // Add to appropriate type array within the category.
             if ('error' === $normalized_type) {

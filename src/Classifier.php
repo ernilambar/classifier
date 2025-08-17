@@ -10,11 +10,8 @@ declare(strict_types=1);
 
 namespace Nilambar\Classifier;
 
-use Nilambar\Classifier\Utils\Group_Utils;
-use Nilambar\Classifier\Utils\JSON_Utils;
-use Nilambar\Classifier\WordPress\WP_Error;
-
-use function Nilambar\Classifier\WordPress\is_wp_error;
+use Nilambar\Classifier\Utils\GroupUtils;
+use Nilambar\Classifier\Utils\JsonUtils;
 
 /**
  * Classifier class.
@@ -44,7 +41,7 @@ class Classifier
      */
     public function __construct(string $config_file, string $schema_file = '')
     {
-        $this->group_config = $this->load_group_config($config_file, $schema_file);
+        $this->group_config = $this->loadGroupConfig($config_file, $schema_file);
     }
 
     /**
@@ -56,23 +53,22 @@ class Classifier
      * @param string $schema_file Path to the JSON schema file for validation.
      * @return array Array of group definitions.
      */
-    private function load_group_config(string $config_file, string $schema_file = ''): array
+    private function loadGroupConfig(string $config_file, string $schema_file = ''): array
     {
-        // Read and validate the group configuration file.
-        $groups = JSON_Utils::read_json($config_file);
-        if (is_wp_error($groups)) {
+        try {
+            // Read and validate the group configuration file.
+            $groups = JsonUtils::readJson($config_file);
+
+            // Validate against schema if provided.
+            if (! empty($schema_file)) {
+                JsonUtils::validateJsonDataWithSchema($groups, $schema_file);
+            }
+
+            return GroupUtils::processGroupConfig($groups);
+        } catch (Exception $e) {
+            // Return empty array on any error.
             return [];
         }
-
-        // Validate against schema if provided.
-        if (! empty($schema_file)) {
-            $validation_result = JSON_Utils::validate_json_data_with_schema($groups, $schema_file);
-            if (is_wp_error($validation_result)) {
-                return [];
-            }
-        }
-
-        return Group_Utils::process_group_config($groups);
     }
 
     /**
@@ -90,7 +86,7 @@ class Classifier
             return [];
         }
 
-        return Group_Utils::classify_data($data, $this->group_config, $code_field);
+        return GroupUtils::classifyData($data, $this->group_config, $code_field);
     }
 
     /**
@@ -100,7 +96,7 @@ class Classifier
      *
      * @return array Group configuration.
      */
-    public function get_group_config(): array
+    public function getGroupConfig(): array
     {
         return $this->group_config;
     }
@@ -112,11 +108,12 @@ class Classifier
      *
      * @param string $json_string JSON string to validate.
      * @param string $schema_file Path to the JSON schema file.
-     * @return bool|WP_Error True if valid, WP_Error on failure.
+     * @return bool True if valid.
+     * @throws Exception When validation fails.
      */
-    public static function validate_json(string $json_string, string $schema_file)
+    public static function validateJson(string $json_string, string $schema_file): bool
     {
-        return JSON_Utils::validate_json_string_with_schema($json_string, $schema_file);
+        return JsonUtils::validateJsonStringWithSchema($json_string, $schema_file);
     }
 
     /**
@@ -126,10 +123,11 @@ class Classifier
      *
      * @param mixed  $data        Data to validate.
      * @param string $schema_file Path to the JSON schema file.
-     * @return bool|WP_Error True if valid, WP_Error on failure.
+     * @return bool True if valid.
+     * @throws Exception When validation fails.
      */
-    public static function validate_data($data, string $schema_file)
+    public static function validateData($data, string $schema_file): bool
     {
-        return JSON_Utils::validate_json_data_with_schema($data, $schema_file);
+        return JsonUtils::validateJsonDataWithSchema($data, $schema_file);
     }
 }
