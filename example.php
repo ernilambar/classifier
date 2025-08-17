@@ -1,103 +1,100 @@
 <?php
 
 /**
- * Example usage of the Classifier package.
+ * Example usage of the Classifier.
  *
- * This file demonstrates how to use the Classifier to group and categorize data.
+ * Demonstrates the classifier workflow:
+ * 1. Plugin provides JSON file path (via constructor)
+ * 2. Validate JSON content with schema
+ * 3. If failed, do not proceed
+ * 4. If pass, then group based on that JSON file config
  */
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 use Nilambar\Classifier\Classifier;
-use Nilambar\Classifier\Utils\GroupUtils;
 
-// Sample data to classify.
+// Sample data to classify
 $sample_data = [
     [
-        'code'    => 'trademark_wordpress',
-        'type'    => 'error',
-        'message' => 'WordPress trademark violation',
-        'file'    => 'plugin.php',
-        'line'    => 10,
+        'code' => 'trademark_prefix_test',
+        'message' => 'Trademark prefix issue found',
+        'type' => 'error'
     ],
     [
-        'code'    => 'WordPress.Security.NonceVerification',
-        'type'    => 'warning',
-        'message' => 'Nonce verification missing',
-        'file'    => 'admin.php',
-        'line'    => 25,
+        'code' => 'WordPress.Security.NonceVerification',
+        'message' => 'Security nonce verification missing',
+        'type' => 'warning'
     ],
     [
-        'code'    => 'readme_missing_header',
-        'type'    => 'error',
-        'message' => 'Readme header is missing',
-        'file'    => 'readme.txt',
-        'line'    => 1,
+        'code' => 'plugin_header_version',
+        'message' => 'Plugin header version issue',
+        'type' => 'error'
     ],
     [
-        'code'    => 'plugin_header_missing',
-        'type'    => 'error',
-        'message' => 'Plugin header is missing',
-        'file'    => 'plugin.php',
-        'line'    => 1,
-    ],
-    [
-        'code'    => 'WordPress.WP.I18n.MissingTextDomain',
-        'type'    => 'warning',
-        'message' => 'Missing text domain',
-        'file'    => 'functions.php',
-        'line'    => 15,
-    ],
-    [
-        'code'    => 'unknown_error_code',
-        'type'    => 'error',
-        'message' => 'Unknown error',
-        'file'    => 'unknown.php',
-        'line'    => 5,
-    ],
+        'code' => 'unknown_issue',
+        'message' => 'Some unknown issue',
+        'type' => 'info'
+    ]
 ];
 
-// Initialize the classifier with configuration and schema files.
-$config_file = __DIR__ . '/data/groups.json';
-$schema_file = __DIR__ . '/data/groups-schema.json';
+echo "=== Classifier Example ===\n\n";
 
-$classifier = new Classifier($config_file, $schema_file);
+// Example 1: Successful workflow
+echo "1. Successful Workflow:\n";
+echo "------------------------\n";
 
-echo "=== Basic Classification ===\n";
-$classified_data = $classifier->classify($sample_data);
-
-foreach ($classified_data as $group_id => $items) {
-    echo "\nGroup: {$group_id}\n";
-    echo "Items: " . count($items) . "\n";
-
-    foreach ($items as $item) {
-        echo "  - {$item['code']}: {$item['message']}\n";
-    }
-}
-
-echo "\n=== Grouped by Type ===\n";
-$grouped_by_type = GroupUtils::groupByType($sample_data, $classifier->getGroupConfig());
-
-foreach ($grouped_by_type['categories'] as $category) {
-    echo "\nCategory: {$category['name']}\n";
-
-    foreach ($category['types'] as $type => $items) {
-        echo "  {$type}: " . count($items) . " items\n";
-
-        foreach ($items as $item) {
-            echo "    - {$item['code']}: {$item['message']}\n";
-        }
-    }
-}
-
-echo "\n=== JSON Validation Example ===\n";
-
-// Example of JSON validation.
-$json_string = '{"test": "value"}';
+$json_file_path = __DIR__ . '/data/groups.json';
 
 try {
-    $validation_result = Classifier::validateJson($json_string, $schema_file);
-    echo "JSON validation successful.\n";
+    // Initialize classifier with JSON file path
+    $classifier = new Classifier($json_file_path);
+
+    // Execute the workflow
+    $result = $classifier->classify($sample_data);
+
+    if (empty($result)) {
+        echo "❌ Validation failed. Process stopped.\n";
+    } else {
+        echo "✅ Validation passed. Data classified successfully.\n\n";
+
+        // Display results
+        foreach ($result as $group_id => $items) {
+            echo "Group: {$group_id}\n";
+            echo "Items: " . count($items) . "\n";
+
+            foreach ($items as $item) {
+                echo "  - {$item['code']}: {$item['message']} ({$item['type']})\n";
+            }
+            echo "\n";
+        }
+    }
 } catch (Exception $e) {
-    echo "Validation failed: " . $e->getMessage() . "\n";
+    echo "❌ Constructor failed: " . $e->getMessage() . "\n";
+}
+
+echo "\n";
+
+// Example 2: Validation failure
+echo "2. Validation Failure:\n";
+echo "----------------------\n";
+
+$invalid_json_file_path = __DIR__ . '/data/non-existent-groups.json';
+
+try {
+    // Initialize classifier with non-existent JSON file path
+    $classifier = new Classifier($invalid_json_file_path);
+
+    // Execute the workflow
+    $result = $classifier->classify($sample_data);
+
+    if (empty($result)) {
+        echo "❌ Validation failed. Process stopped.\n";
+        echo "This is the expected behavior when validation fails.\n";
+    } else {
+        echo "✅ Validation passed. Data classified successfully.\n";
+    }
+} catch (Exception $e) {
+    echo "❌ Constructor failed: " . $e->getMessage() . "\n";
+    echo "This is the expected behavior when JSON file is invalid.\n";
 }

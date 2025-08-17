@@ -22,6 +22,9 @@ alwaysApply: true
   - Use Yoda conditions ALWAYS.
   - PHP inline comments must start with capital letter and end with period character.
   - PHP inline comments should be concise.
+  - Inline comments in any type of files should start with capital letter and end with period character.
+  - PHP doc description should be concise.
+  - Prefer since tag in PHP doc. Use "1.0.0" if does not exist. ALWAYS check for missing @since tags in PHPDoc blocks and add them where appropriate.
 
   Dependencies
   - Composer for dependency management
