@@ -1,6 +1,6 @@
 {
 	"name": "ernilambar/classifier",
-	"description": "",
+	"description": "A PHP library for classifying and grouping data based on JSON configuration rules with schema validation support.",
 	"license": "MIT",
 	"type": "library",
 	"authors": [
@@ -12,7 +12,8 @@
 		}
 	],
 	"require": {
-		"php": ">=7.4"
+		"php": ">=7.4",
+		"justinrainbow/json-schema": "^6.4"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1",
@@ -27,7 +28,10 @@
 	"autoload": {
 		"psr-4": {
 			"Nilambar\\Classifier\\": "src/"
-		}
+		},
+		"files": [
+			"src/WordPress/Functions.php"
+		]
 	},
 	"config": {
 		"allow-plugins": {
