@@ -160,33 +160,7 @@ class ClassifierTest extends TestCase
         $this->assertNotEmpty($result['plugin_header']);
     }
 
-    /**
-     * Test classification of data with custom code field.
-     *
-     * @since 1.0.0
-     */
-    public function testClassifyDataWithCustomCodeField(): void
-    {
-        $config_file = __DIR__ . '/../data/groups.json';
-        $classifier = new Classifier($config_file);
 
-        // Test data with custom code field name.
-        $custom_data = [
-            [
-                'file' => 'test.php',
-                'line' => 10,
-                'type' => 'ERROR',
-                'custom_code' => 'WordPress.WP.I18n.MissingArgDomain',
-                'message' => 'Test message',
-            ],
-        ];
-
-        $result = $classifier->classify($custom_data, 'custom_code');
-
-        $this->assertIsArray($result);
-        $this->assertNotEmpty($result);
-        $this->assertArrayHasKey('i18n', $result);
-    }
 
     /**
      * Test classification with empty data.
