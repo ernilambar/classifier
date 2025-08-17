@@ -6,9 +6,6 @@ A PHP library for classifying and grouping data based on JSON configuration rule
 
 - **Flexible Classification**: Group data based on prefix or contains matching rules
 - **JSON Schema Validation**: Validate configuration files against JSON schemas
-- **WordPress Compatible**: Follows WordPress coding standards and patterns
-- **Type-based Grouping**: Group data by type (error, warning, etc.) within categories
-- **Standalone Library**: Works both in WordPress and standalone PHP environments
 
 ## Installation
 
@@ -18,18 +15,25 @@ composer require ernilambar/classifier
 
 ## Usage
 
-### Basic Classification
+### Workflow
+
+The classifier follows this simple workflow:
+
+1. Plugin provides JSON file path (via constructor)
+2. Validate JSON content with schema
+3. If failed, do not proceed
+4. If pass, then group based on that JSON file config
 
 ```php
 use Nilambar\Classifier\Classifier;
 
-// Initialize the classifier with configuration and schema files
-$classifier = new Classifier(
-    '/path/to/groups.json',
-    '/path/to/groups-schema.json'
-);
+// Define JSON file path.
+$json_file_path = '/path/to/groups.json';
 
-// Sample data to classify
+// Initialize classifier with JSON file path.
+$classifier = new Classifier($json_file_path);
+
+// Sample data to classify.
 $data = [
     [
         'code'    => 'trademark_wordpress',
@@ -43,59 +47,25 @@ $data = [
     ],
 ];
 
-// Classify the data
-$classified_data = $classifier->classify($data);
+// Execute the workflow
+$result = $classifier->classify($data);
 
-// Process the results
-foreach ($classified_data as $group_id => $items) {
-    echo "Group: {$group_id}\n";
-    foreach ($items as $item) {
-        echo "  - {$item['code']}: {$item['message']}\n";
+if (empty($result)) {
+    echo "Validation failed. Process stopped.";
+} else {
+    // Process the classified data
+    foreach ($result as $group_id => $items) {
+        echo "Group: {$group_id}\n";
+        foreach ($items as $item) {
+            echo "  - {$item['code']}: {$item['message']}\n";
+        }
     }
-}
-```
-
-### Group by Type
-
-```php
-use Nilambar\Classifier\Utils\GroupUtils;
-
-// Group data by type within categories
-$grouped_by_type = GroupUtils::groupByType(
-    $data,
-    $classifier->getGroupConfig(),
-    'code',    // Field containing the classification code
-    'type'     // Field containing the type information
-);
-
-foreach ($grouped_by_type['categories'] as $category) {
-    echo "Category: {$category['name']}\n";
-
-    foreach ($category['types'] as $type => $items) {
-        echo "  {$type}: " . count($items) . " items\n";
-    }
-}
-```
-
-### JSON Validation
-
-```php
-use Nilambar\Classifier\Classifier;
-
-// Validate JSON string against schema
-$json_string = '{"test": "value"}';
-
-try {
-    $validation_result = Classifier::validateJson($json_string, '/path/to/schema.json');
-    echo "JSON validation successful.";
-} catch (Exception $e) {
-    echo "Validation failed: " . $e->getMessage();
 }
 ```
 
 ## Configuration Format
 
-The classifier uses a JSON configuration file to define grouping rules. Here's an example:
+The classifier uses a JSON configuration file to define grouping rules:
 
 ```json
 {
@@ -110,25 +80,11 @@ The classifier uses a JSON configuration file to define grouping rules. Here's a
         "type": "prefix",
         "parent": "trademark",
         "checks": ["trademark_"]
-      },
-      "trademark_contains": {
-        "id": "trademark_contains",
-        "title": "Trademarks Contains",
-        "type": "contains",
-        "parent": "trademark",
-        "checks": ["trademark"]
       }
     }
   }
 }
 ```
-
-### Configuration Structure
-
-- **Parent Groups**: Can have children and serve as category containers
-- **Child Groups**: Define specific matching rules
-- **Type**: Either `prefix` (starts with) or `contains` (contains string)
-- **Checks**: Array of strings to match against item codes
 
 ## Requirements
 

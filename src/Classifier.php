@@ -37,10 +37,10 @@ class Classifier
      * @since 1.0.0
      *
      * @param string $config_file Path to the group configuration JSON file.
-     * @param string $schema_file Path to the JSON schema file for validation.
      */
-    public function __construct(string $config_file, string $schema_file = '')
+    public function __construct(string $config_file)
     {
+        $schema_file = __DIR__ . '/../data/groups-schema.json';
         $this->group_config = $this->loadGroupConfig($config_file, $schema_file);
     }
 
@@ -87,47 +87,5 @@ class Classifier
         }
 
         return GroupUtils::classifyData($data, $this->group_config, $code_field);
-    }
-
-    /**
-     * Gets the group configuration.
-     *
-     * @since 1.0.0
-     *
-     * @return array Group configuration.
-     */
-    public function getGroupConfig(): array
-    {
-        return $this->group_config;
-    }
-
-    /**
-     * Validates a JSON string against a schema.
-     *
-     * @since 1.0.0
-     *
-     * @param string $json_string JSON string to validate.
-     * @param string $schema_file Path to the JSON schema file.
-     * @return bool True if valid.
-     * @throws Exception When validation fails.
-     */
-    public static function validateJson(string $json_string, string $schema_file): bool
-    {
-        return JsonUtils::validateJsonStringWithSchema($json_string, $schema_file);
-    }
-
-    /**
-     * Validates JSON data against a schema.
-     *
-     * @since 1.0.0
-     *
-     * @param mixed  $data        Data to validate.
-     * @param string $schema_file Path to the JSON schema file.
-     * @return bool True if valid.
-     * @throws Exception When validation fails.
-     */
-    public static function validateData($data, string $schema_file): bool
-    {
-        return JsonUtils::validateJsonDataWithSchema($data, $schema_file);
     }
 }
