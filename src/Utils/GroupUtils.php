@@ -135,7 +135,7 @@ class GroupUtils
         foreach ($all_groups as $group_id => $group_details) {
             if (isset($group_details['checks'])) {
                 foreach ($group_details['checks'] as $check) {
-                    if (str_starts_with($code, $check) || str_contains($code, $check)) {
+                    if (0 === strpos($code, $check) || false !== strpos($code, $check)) {
                         // Check if this is a child category and return the parent instead.
                         if (isset($group_details['parent']) && !empty($group_details['parent'])) {
                             return $group_details['parent'];

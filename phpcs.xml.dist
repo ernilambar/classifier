@@ -8,6 +8,9 @@
     <!-- Additional rules for better code quality -->
     <rule ref="PSR12"/>
 
+	<rule ref="PHPCompatibility"/>
+	<config name="testVersion" value="7.4-"/>
+
     <!-- Custom rules for the project -->
     <rule ref="Generic.Files.LineLength">
         <properties>
@@ -25,9 +28,6 @@
 
     <!-- Include all PHP files in src directory -->
     <file>src/</file>
-
-    <!-- Include example files -->
-    <file>example.php</file>
 
     <!-- Show progress -->
     <arg value="p"/>

@@ -113,7 +113,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifierInstantiation(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $this->assertInstanceOf(Classifier::class, $classifier);
@@ -139,7 +139,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyDataWithDefaultCodeField(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $result = $classifier->classify($this->test_data);
@@ -169,7 +169,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyEmptyData(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $result = $classifier->classify([]);
@@ -185,7 +185,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassifyDataWithNoMatchingCodes(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $unmatched_data = [
@@ -213,7 +213,7 @@ class ClassifierTest extends TestCase
      */
     public function testI18nIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $i18n_data = [
@@ -248,7 +248,7 @@ class ClassifierTest extends TestCase
      */
     public function testPluginReadmeIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $readme_data = [
@@ -281,7 +281,7 @@ class ClassifierTest extends TestCase
      */
     public function testPluginHeaderIssuesClassification(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $header_data = [
@@ -307,7 +307,7 @@ class ClassifierTest extends TestCase
      */
     public function testClassificationWithMixedDataTypes(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $mixed_data = [
@@ -361,7 +361,7 @@ class ClassifierTest extends TestCase
      */
     public function testDataStructurePreservation(): void
     {
-        $config_file = __DIR__ . '/../data/groups.json';
+        $config_file = __DIR__ . '/data/test-groups.json';
         $classifier = new Classifier($config_file);
 
         $test_item = [

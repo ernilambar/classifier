@@ -3,9 +3,9 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
-         verbose="true"
-         stopOnFailure="false"
-         stopOnError="false"
+         verbose="false"
+         stopOnFailure="true"
+         stopOnError="true"
          stopOnIncomplete="false"
          stopOnSkipped="false"
          stopOnRisky="false"
@@ -20,17 +20,17 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnDefect="false"
+         stopOnDefect="true"
          beStrictAboutChangesToGlobalState="false"
          beStrictAboutCoversAnnotation="false"
          beStrictAboutOutputDuringTests="false"
          beStrictAboutResourceUsageDuringSmallTests="false"
          beStrictAboutTestsThatDoNotTestAnything="false"
          beStrictAboutTodoAnnotatedTests="false"
-         enforceTimeLimit="false"
+         enforceTimeLimit="true"
          timeoutForSmallTests="1"
-         timeoutForMediumTests="10"
-         timeoutForLargeTests="60">
+         timeoutForMediumTests="5"
+         timeoutForLargeTests="30">
     <testsuites>
         <testsuite name="Classifier Test Suite">
             <directory>tests</directory>
