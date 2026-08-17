@@ -94,4 +94,4 @@ The classifier uses a JSON configuration file to define grouping rules:
 
 ## License
 
-MIT License
+[MIT](LICENSE)
